@@ -82,6 +82,3 @@ playback speed.
 
 The rings and logo are based on the "vortex-ubuntu-plymouth-theme" by
 Emanuele Scarsella (GPL-2.0).
-# vortex-ubuntu-ascension
-# vortex-ubuntu-ascension
-# vortex-ubuntu-ascension
