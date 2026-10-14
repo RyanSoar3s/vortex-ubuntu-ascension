@@ -1,0 +1,9 @@
+[Plymouth Theme]
+Name=Vortex Ubuntu Ascension
+Description=An expanded evolution of the Ubuntu Vortex Plymouth theme
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/vortex-ubuntu-ascension
+ScriptFile=/usr/share/plymouth/themes/vortex-ubuntu-ascension/vortex-ubuntu-ascension.script
+UseFirmwareBackground=false

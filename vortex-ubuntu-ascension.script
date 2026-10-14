@@ -1,0 +1,145 @@
+/* Vortex Ubuntu Ascension - expanded Ubuntu Vortex boot splash.
+ * Frame-based script theme that plays frame-N.png and implements Plymouth
+ * callbacks for messages, LUKS password prompts, questions, and progress.
+ */
+
+/* --------------------------------------------------------------- screen */
+screen.w = Window.GetWidth();
+screen.h = Window.GetHeight();
+screen.half.w = screen.w / 2;
+screen.half.h = screen.h / 2;
+
+Window.SetBackgroundTopColor(0, 0, 0);
+Window.SetBackgroundBottomColor(0, 0, 0);
+
+/* ------------------------------------------------------------ animation */
+FRAME_COUNT = 334;   # Number of frames, from frame-0.png to frame-333.png.
+PLAYBACK_FPS = 31.2; # 1.3x the source frame rate (24 fps).
+ANIMATION_START_FRAME = 0;
+if (Plymouth.GetMode() != "boot")
+    ANIMATION_START_FRAME = 142;  # Begin with the formed logo during shutdown/reboot.
+
+for (i = 0; i < FRAME_COUNT; i++)
+    frame_image[i] = Image("frames/frame-" + i + ".png");
+
+img_w = frame_image[0].GetWidth();
+img_h = frame_image[0].GetHeight();
+
+sprite = Sprite();
+sprite.SetX(screen.half.w - img_w / 2);
+sprite.SetY(screen.half.h - img_h / 2);
+sprite.SetZ(1);
+sprite.SetImage(frame_image[ANIMATION_START_FRAME]);
+
+counter = 0;
+stop_animation = 0;
+
+/* -------------------------------------------------- helpers and state */
+bullet_image = Image("assets/dot.png").Scale(10, 10);
+text_line_height = Image.Text("Dummy text abcxyz").GetHeight();
+prompt_y = screen.h * 0.75;
+response_y = prompt_y + text_line_height * 2;
+message_y = prompt_y + text_line_height * 4;
+
+message = null;
+prompt = null;
+response = null;
+
+fun refresh_callback ()
+{
+    if (stop_animation == 0) {
+        # Plymouth calls this function about 50 times per second.
+        idx = ANIMATION_START_FRAME + Math.Int(counter * PLAYBACK_FPS / 50);
+        if (idx >= FRAME_COUNT) idx = FRAME_COUNT - 1;
+        else counter++;
+        sprite.SetImage(frame_image[idx]);
+    }
+}
+
+Plymouth.SetRefreshFunction(refresh_callback);
+
+/* --------------------------------------------------------- progress bar */
+if (Plymouth.GetMode() == "boot") {
+    progress_image = Image("assets/progress.png");
+    progress_sprite = Sprite(progress_image);
+    progress_sprite.SetX(screen.half.w - 50);
+    progress_sprite.SetY(screen.h * 0.6 - progress_image.GetHeight() / 2);
+    progress_sprite.SetZ(30);
+
+    fun boot_progress_callback (duration, progress)
+    {
+        width = 100 * progress; if (width < 1) width = 1;
+        progress_sprite.SetImage(progress_image.Scale(width, 3));
+    }
+    Plymouth.SetBootProgressFunction(boot_progress_callback);
+}
+
+/* ------------------------------------------------ prompts and dialogs */
+fun display_prompt (prompt_text)
+{
+    prompt.image = Image.Text(prompt_text, 1, 1, 1, 1, "Sans 12");
+    prompt.sprite = Sprite(prompt.image);
+    prompt.sprite.SetPosition(screen.half.w - prompt.image.GetWidth() / 2, prompt_y);
+    prompt.sprite.SetZ(30);
+}
+
+fun display_question_callback (prompt_text, entry)
+{
+    stop_animation = 1;
+    display_prompt(prompt_text);
+
+    local.alpha = 1.0;
+    local.font = "Sans Bold 12";
+    if (entry == "") {
+        entry = "Type your response";
+        local.alpha = 0.5;
+        local.font = "Sans 12";
+    }
+
+    response = null;
+    response.image = Image.Text(entry, 1, 1, 1, local.alpha, local.font);
+    response.sprite = Sprite(response.image);
+    response.sprite.SetPosition(screen.half.w - response.image.GetWidth() / 2, response_y);
+    response.sprite.SetZ(30);
+}
+Plymouth.SetDisplayQuestionFunction(display_question_callback);
+
+fun display_password_callback (prompt_text, dot_count)
+{
+    stop_animation = 1;
+    display_prompt(prompt_text);
+
+    response = null;
+    if (dot_count > 0) {
+        dot_start = screen.half.w - (dot_count * bullet_image.GetWidth()) / 2;
+        for (i = 0; i < dot_count; i++) {
+            response[i].sprite = Sprite(bullet_image);
+            response[i].sprite.SetPosition(dot_start + i * bullet_image.GetWidth(), response_y + (text_line_height - bullet_image.GetHeight()) / 2);
+            response[i].sprite.SetZ(30);
+        }
+    } else {
+        response.image = Image.Text("Enter passphrase", 1, 1, 1, 0.5, "Sans 12");
+        response.sprite = Sprite(response.image);
+        response.sprite.SetPosition(screen.half.w - response.image.GetWidth() / 2, response_y);
+        response.sprite.SetZ(30);
+    }
+}
+Plymouth.SetDisplayPasswordFunction(display_password_callback);
+
+fun display_normal_callback ()
+{
+    prompt = null;
+    message = null;
+    response = null;
+    stop_animation = 0;
+}
+Plymouth.SetDisplayNormalFunction(display_normal_callback);
+
+fun message_callback (text)
+{
+    message.image = Image.Text(text, 1, 1, 1, 0.75, "Sans 10");
+    message.sprite = Sprite(message.image);
+    message.sprite.SetPosition(screen.half.w - message.image.GetWidth() / 2, message_y);
+    message.sprite.SetZ(30);
+}
+Plymouth.SetMessageFunction(message_callback);
