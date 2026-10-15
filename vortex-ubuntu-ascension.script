@@ -20,17 +20,17 @@ ANIMATION_START_FRAME = FIRST_FRAME;
 if (Plymouth.GetMode() != "boot")
     ANIMATION_START_FRAME = 142;  # Begin with the formed logo during shutdown/reboot.
 
-for (i = FIRST_FRAME; i <= LAST_FRAME; i++)
-    frame_image[i] = Image("frames/frame-" + i + ".png");
+current_frame = ANIMATION_START_FRAME;
+frame_image = Image("frames/frame-" + current_frame + ".png");
 
-img_w = frame_image[FIRST_FRAME].GetWidth();
-img_h = frame_image[FIRST_FRAME].GetHeight();
+img_w = frame_image.GetWidth();
+img_h = frame_image.GetHeight();
 
 sprite = Sprite();
 sprite.SetX(screen.half.w - img_w / 2);
 sprite.SetY(screen.half.h - img_h / 2);
 sprite.SetZ(1);
-sprite.SetImage(frame_image[ANIMATION_START_FRAME]);
+sprite.SetImage(frame_image);
 
 counter = 0;
 stop_animation = 0;
@@ -53,7 +53,11 @@ fun refresh_callback ()
         idx = ANIMATION_START_FRAME + Math.Int(counter * PLAYBACK_FPS / 50);
         if (idx > LAST_FRAME) idx = LAST_FRAME;
         else counter++;
-        sprite.SetImage(frame_image[idx]);
+        if (idx != current_frame) {
+            frame_image = Image("frames/frame-" + idx + ".png");
+            sprite.SetImage(frame_image);
+            current_frame = idx;
+        }
     }
 }
 

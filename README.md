@@ -27,11 +27,18 @@ Run:
 sudo ./install.sh
 ```
 
-The installer saves the currently selected Plymouth theme, copies the Vortex
-theme, selects it as the default, and rebuilds the initramfs. On uninstall, it
-restores the saved theme if that theme is still installed and registered;
-otherwise, it asks `update-alternatives` to select automatically from the
-remaining registered themes.
+The installer saves the current `update-alternatives` selection mode
+(`auto` or `manual`) and, when available, the selected Plymouth theme. It then
+copies and activates Vortex and rebuilds the initramfs. If installation fails,
+it attempts to restore the previous theme files, alternative registration,
+selection mode, and initramfs; it reports any rollback step that fails and
+retains recovery state when rollback is incomplete.
+
+On uninstall, the saved mode is restored along with the prior theme selection.
+If the previous theme is no longer installed and registered, a valid remaining
+theme is selected automatically. Existing state from older installer versions
+is also accepted; when that state has no saved mode, uninstall uses the earlier
+manual-selection behavior for a saved theme and automatic selection otherwise.
 
 ## Test different modes
 
@@ -77,9 +84,12 @@ sudo ./uninstall.sh
   prompts run only when explicitly requested with `prompt`; they are not shown
   during ordinary boot or shutdown.
 
-The Plymouth script loads all 307 frames into memory (approximately 607 MiB
-at 4 bytes per pixel). `PLAYBACK_FPS` in `vortex-ubuntu-ascension.script`
-controls playback speed.
+The Plymouth script loads frames on demand rather than keeping all 307 decoded
+images in a permanent array. The source frames remain 960 × 540 and playback
+uses the full sequence, so this reduces the script's retained image references
+without reducing resolution or frame count. Peak memory can still vary with
+Plymouth's image handling while a frame changes. `PLAYBACK_FPS` in
+`vortex-ubuntu-ascension.script` controls playback speed.
 
 ## Credits
 
