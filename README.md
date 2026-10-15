@@ -10,7 +10,7 @@ for password and question prompts, status messages, and boot progress.
 
 ## Project layout
 
-- `frames/` — 334 animation frames.
+- `frames/` — 307 animation frames at 960 × 540.
 - `assets/` — password bullet and Ubuntu-orange progress bar images.
 - `previews/vortex-ubuntu-ascension.gif` — animated preview of the rendered frames.
 - `vortex-ubuntu-ascension.script` — animation and Plymouth callbacks.
@@ -62,7 +62,7 @@ sudo ./uninstall.sh
 
 ## Features
 
-- Plays all 334 frames at 1.3x the source rate (about 10.7 seconds), then holds
+- Plays all 307 frames at 1x the source rate (about 12.8 seconds), then holds
   on the formed logo instead of looping back to black.
 - Starts non-boot modes at the already-formed logo so it appears immediately
   during shutdown or reboot.
@@ -74,9 +74,9 @@ sudo ./uninstall.sh
   prompts run only when explicitly requested with `prompt`; they are not shown
   during ordinary boot or shutdown.
 
-The Plymouth script loads all 334 frames into memory (approximately 1.2 GB
-uncompressed). `PLAYBACK_FPS` in `vortex-ubuntu-ascension.script` controls
-playback speed.
+The Plymouth script loads all 307 frames into memory (approximately 607 MiB
+at 4 bytes per pixel). `PLAYBACK_FPS` in `vortex-ubuntu-ascension.script`
+controls playback speed.
 
 ## Credits
 

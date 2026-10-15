@@ -13,17 +13,18 @@ Window.SetBackgroundTopColor(0, 0, 0);
 Window.SetBackgroundBottomColor(0, 0, 0);
 
 /* ------------------------------------------------------------ animation */
-FRAME_COUNT = 334;   # Number of frames, from frame-0.png to frame-333.png.
-PLAYBACK_FPS = 31.2; # 1.3x the source frame rate (24 fps).
-ANIMATION_START_FRAME = 0;
+FIRST_FRAME = 1;
+LAST_FRAME = 307;
+PLAYBACK_FPS = 24; # 1x the source frame rate.
+ANIMATION_START_FRAME = FIRST_FRAME;
 if (Plymouth.GetMode() != "boot")
     ANIMATION_START_FRAME = 142;  # Begin with the formed logo during shutdown/reboot.
 
-for (i = 0; i < FRAME_COUNT; i++)
+for (i = FIRST_FRAME; i <= LAST_FRAME; i++)
     frame_image[i] = Image("frames/frame-" + i + ".png");
 
-img_w = frame_image[0].GetWidth();
-img_h = frame_image[0].GetHeight();
+img_w = frame_image[FIRST_FRAME].GetWidth();
+img_h = frame_image[FIRST_FRAME].GetHeight();
 
 sprite = Sprite();
 sprite.SetX(screen.half.w - img_w / 2);
@@ -50,7 +51,7 @@ fun refresh_callback ()
     if (stop_animation == 0) {
         # Plymouth calls this function about 50 times per second.
         idx = ANIMATION_START_FRAME + Math.Int(counter * PLAYBACK_FPS / 50);
-        if (idx >= FRAME_COUNT) idx = FRAME_COUNT - 1;
+        if (idx > LAST_FRAME) idx = LAST_FRAME;
         else counter++;
         sprite.SetImage(frame_image[idx]);
     }
