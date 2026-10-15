@@ -33,11 +33,14 @@ copies and activates Vortex and rebuilds the initramfs. If installation fails,
 it attempts to restore the previous theme files, alternative registration,
 selection mode, and initramfs; it reports any rollback step that fails and
 retains recovery state when rollback is incomplete.
+For safety, a reinstall stops before changing the system if the saved state is
+incomplete or invalid; it does not infer a missing mode or replace existing
+saved settings.
 
 On uninstall, the saved mode is restored along with the prior theme selection.
 If the previous theme is no longer installed and registered, a valid remaining
-theme is selected automatically. Existing state from older installer versions
-is also accepted; when that state has no saved mode, uninstall uses the earlier
+theme is selected automatically. The uninstaller also accepts state from older
+installer versions; when that state has no saved mode, it uses the earlier
 manual-selection behavior for a saved theme and automatic selection otherwise.
 
 ## Test different modes
