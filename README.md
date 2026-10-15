@@ -27,8 +27,11 @@ Run:
 sudo ./install.sh
 ```
 
-The installer copies the theme, selects it as the default, and rebuilds the
-initramfs.
+The installer saves the currently selected Plymouth theme, copies the Vortex
+theme, selects it as the default, and rebuilds the initramfs. On uninstall, it
+restores the saved theme if that theme is still installed and registered;
+otherwise, it asks `update-alternatives` to select automatically from the
+remaining registered themes.
 
 ## Test different modes
 

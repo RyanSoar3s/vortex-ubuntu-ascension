@@ -7,6 +7,8 @@ THEME="vortex-ubuntu-ascension"
 SRC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DEST_DIR="/usr/share/plymouth/themes/${THEME}"
 ALTERNATIVE="/usr/share/plymouth/themes/default.plymouth"
+STATE_DIR="/var/lib/${THEME}"
+PREVIOUS_THEME="${STATE_DIR}/previous-default.plymouth"
 
 require_root() {
     if [[ "${EUID}" -ne 0 ]]; then
@@ -16,6 +18,28 @@ require_root() {
 }
 
 require_root
+
+if ! command -v update-alternatives >/dev/null 2>&1; then
+    echo "update-alternatives is required to install the Plymouth theme." >&2
+    exit 1
+fi
+
+if [[ ! -f "${PREVIOUS_THEME}" ]]; then
+    if previous_selection="$(update-alternatives --query default.plymouth 2>/dev/null)"; then
+        previous_theme="$(awk -F ': ' '$1 == "Value" {print substr($0, index($0, ": ") + 2); exit}' <<< "${previous_selection}")"
+        if [[ -n "${previous_theme}" \
+            && "${previous_theme}" != "${DEST_DIR}/${THEME}.plymouth" \
+            && -f "${previous_theme}" ]]; then
+            mkdir -p "${STATE_DIR}"
+            printf '%s\n' "${previous_theme}" > "${PREVIOUS_THEME}"
+            echo "==> Saved previous Plymouth theme: ${previous_theme}"
+        else
+            echo "==> No existing Plymouth theme to save; automatic selection will be used on removal"
+        fi
+    else
+        echo "==> No existing Plymouth alternative; automatic selection will be used on removal"
+    fi
+fi
 
 echo "==> Copying theme to ${DEST_DIR}"
 mkdir -p "${DEST_DIR}"
